@@ -1,0 +1,21 @@
+{
+  "name": "testamazon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium",
+    "test:headed": "playwright test --project=chromium --headed",
+    "report": "playwright show-report",
+    "setup:webkit-libs": "rm -rf .webkit-libs && mkdir -p .webkit-libs/tmp && cd .webkit-libs/tmp && apt-get download libavif16 libgav1-1 && for f in *.deb; do dpkg -x $f x; done && cp -a x/usr/lib/x86_64-linux-gnu/*.so.* .. && cd .. && rm -rf tmp"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^26.6.5"
+  }
+}
