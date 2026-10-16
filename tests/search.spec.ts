@@ -40,6 +40,17 @@ test.describe('Search', () => {
     await expect(suggestions.first()).toBeVisible();
   });
 
+  test('should filter products when searching', async ({ page }) => {
+    const searchInput = page.locator('#twotabsearchtextbox');
+    await searchInput.fill('laptop');
+    await searchInput.press('Enter');
+    await expect(page).toHaveURL(searchUrl('laptop'));
+    const productTitles = page.locator('.s-title-instructions-style');
+    await expect(productTitles.first()).toBeVisible();
+    const titles = await productTitles.allInnerTexts();
+    expect(titles.some((t) => /laptop/i.test(t))).toBeTruthy();
+  });
+
   test('can be restricted to a category', async ({ page, homePage, searchResultsPage }) => {
     await homePage.searchCategory.selectOption({ value: 'search-alias=stripbooks' });
     await homePage.search('Harry Potter');
