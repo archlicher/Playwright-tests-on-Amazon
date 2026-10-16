@@ -29,13 +29,7 @@ export class BasePage {
    * a cookie consent banner for EU visitors. Dismiss both if present.
    */
   async dismissInterstitials() {
-    const continueShopping = this.page.getByRole('button', {
-      name: /Weiter shoppen|Continue shopping/i,
-    });
-    if (await continueShopping.isVisible().catch(() => false)) {
-      await continueShopping.click();
-      await this.page.waitForLoadState('domcontentloaded');
-    }
+    await this.continueIfBotCheck();
 
     // The banner is injected by a script and can show up late (notably in Firefox).
     const acceptCookies = this.page.locator('#sp-cc-accept');
@@ -48,10 +42,31 @@ export class BasePage {
     await acceptCookies.waitFor({ state: 'hidden' });
   }
 
+  /**
+   * Amazon serves a "continue shopping" bot check instead of the requested page,
+   * most often to datacenter IPs such as CI runners. It can appear after any
+   * navigation, so click through it if present. Returns true if it was shown.
+   */
+  async continueIfBotCheck(): Promise<boolean> {
+    const continueShopping = this.page.getByRole('button', {
+      name: /Weiter shoppen|Continue shopping/i,
+    });
+    if (!(await continueShopping.isVisible().catch(() => false))) return false;
+    await continueShopping.click();
+    await this.page.waitForLoadState('domcontentloaded');
+    return true;
+  }
+
   async search(term: string) {
     await this.searchBox.fill(term);
     await this.searchButton.click();
     await this.page.waitForLoadState('domcontentloaded');
+    // The bot check drops the search, so repeat it once we're through.
+    if (await this.continueIfBotCheck()) {
+      await this.searchBox.fill(term);
+      await this.searchButton.click();
+      await this.page.waitForLoadState('domcontentloaded');
+    }
   }
 
   async getCartCount(): Promise<number> {

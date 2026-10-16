@@ -15,6 +15,10 @@ export class CartPage extends BasePage {
 
   async open() {
     await this.page.goto('/gp/cart/view.html');
+    // Clicking through the bot check lands on the home page, so reload the cart.
+    if (await this.continueIfBotCheck()) {
+      await this.page.goto('/gp/cart/view.html');
+    }
     await this.dismissInterstitials();
   }
 

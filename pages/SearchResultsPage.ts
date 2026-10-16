@@ -17,7 +17,11 @@ export class SearchResultsPage extends BasePage {
       hasNot: this.page.locator('.puis-sponsored-label-text, .s-sponsored-label-text'),
     });
     const link = organic.nth(index).locator('a:has(h2), h2 a').first();
+    const href = await link.getAttribute('href');
     await link.click();
     await this.page.waitForLoadState('domcontentloaded');
+    if (await this.continueIfBotCheck() && href) {
+      await this.page.goto(href);
+    }
   }
 }
